@@ -2,7 +2,9 @@
 #include "Game.h"
 
 Game::Game( const Window& window ) 
-	:BaseGame{ window }
+	: BaseGame	{window}
+	, m_Window{ window }
+	, m_Camera{window.width,window.height}
 {
 	Initialize();
 }
@@ -10,15 +12,24 @@ Game::Game( const Window& window )
 Game::~Game( )
 {
 	Cleanup( );
+
 }
 
 void Game::Initialize( )
 {
+	m_pCurrentPlayer = new Avatar{};
+	m_pLevel = new Level{};
+	m_pCurrentPlayer->InitTextures();
+	m_Camera.SetLevelBoundaries(m_pLevel->GetBoundaries());
 	
 }
 
 void Game::Cleanup( )
 {
+	delete m_pCurrentPlayer;
+	m_pCurrentPlayer = nullptr;
+	delete m_pLevel;
+	m_pLevel = nullptr;
 }
 
 void Game::Update( float elapsedSec )
@@ -33,34 +44,70 @@ void Game::Update( float elapsedSec )
 	//{
 	//	std::cout << "Left and up arrow keys are down\n";
 	//}
+
+	m_pCurrentPlayer->Update(elapsedSec,*m_pLevel);
+
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
+	glPushMatrix();
+	{
+		m_Camera.Transform(m_pCurrentPlayer->GetShape());
+		m_pLevel->DrawBackground();
+		
+		m_pCurrentPlayer->Draw();
+	}
+	glPopMatrix();
+	
+	
+
+	
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
 	//std::cout << "KEYDOWN event: " << e.keysym.sym << std::endl;
+
+	//switch (e.keysym.sym)
+	//{
+	//case SDLK_DOWN:
+	//	//m_pCurrentPlayer->SpriteIdx(3);
+	//	m_CurrentMovement = Avatar::movement::crouch;
+	//	break;
+	///*case SDLK_RIGHT:
+	//	m_pCurrentPlayer->SpriteIdx(1);
+	//	m_CurrentMovement	= Avatar::movement::right;
+
+	//	break;
+	//case SDLK_LEFT:
+	//	m_pCurrentPlayer->SpriteIdx(1);
+	//	m_CurrentMovement = Avatar::movement::left;
+	//	break;*/
+	//case SDLK_UP:
+	//	//m_pCurrentPlayer->SpriteIdx(4);
+	//	m_CurrentMovement = Avatar::movement::jump;
+	//	break;
+	//default:
+	//	break;
+	//}
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
-	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
-	//switch ( e.keysym.sym )
-	//{
-	//case SDLK_LEFT:
-	//	//std::cout << "Left arrow key released\n";
-	//	break;
-	//case SDLK_RIGHT:
-	//	//std::cout << "`Right arrow key released\n";
-	//	break;
-	//case SDLK_1:
-	//case SDLK_KP_1:
-	//	//std::cout << "Key 1 released\n";
-	//	break;
-	//}
+	switch ( e.keysym.sym )
+	{
+
+	case SDLK_1:
+	case SDLK_KP_1:
+		//std::cout << "Key 1 released\n";
+		break;
+	default:
+		//m_CurrentMovement = Avatar::movement::idle;
+		//m_pCurrentPlayer->SpriteIdx(0);
+		break;
+	}
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
