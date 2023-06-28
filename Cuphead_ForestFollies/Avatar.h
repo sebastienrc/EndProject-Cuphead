@@ -49,7 +49,8 @@ private:
 	std::vector<Sprite*> m_pMainCharSprites;
 
 	static int m_SpriteIdx;
-	
+	static int m_TimesJumped;
+
 	bool m_IsCrouching;
 	bool m_IsShooting;
 	bool m_IsMirrored;

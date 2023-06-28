@@ -56,7 +56,6 @@ void Game::Draw( ) const
 	{
 		m_Camera.Transform(m_pCurrentPlayer->GetShape());
 		m_pLevel->DrawBackground();
-		
 		m_pCurrentPlayer->Draw();
 	}
 	glPopMatrix();

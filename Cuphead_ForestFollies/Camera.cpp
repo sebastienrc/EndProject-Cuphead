@@ -14,9 +14,13 @@ Camera::Camera(float width, float height)
 
 void Camera::Transform(const Rectf& target) const
 {
-	Point2f pos{ Track(target) };
-	Clamp(pos);
-	glTranslatef(-pos.x, -pos.y, 0);
+	glPushMatrix();
+	{
+		Point2f pos{ Track(target) };
+		Clamp(pos);
+		glTranslatef(-pos.x, -pos.y, 0);
+	}
+	glPopMatrix();
 }
 
 
@@ -31,7 +35,7 @@ Point2f Camera::Track(const Rectf& target) const
 	Point2f track(target.left + target.width / 2 - m_Width / 2,
 		target.bottom + target.height / 2 - m_Height / 2);
 
-	std::cout << "(" << track.x<< ", " << track.y << ")" << std::endl;
+	
 
 	return track;
 

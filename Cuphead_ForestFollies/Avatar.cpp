@@ -5,14 +5,15 @@
 #include <iostream>
 
 int Avatar::m_SpriteIdx{ 0 };
+int Avatar::m_TimesJumped{ 0 };
 
 Avatar::Avatar() :
-	  m_Pos				{Point2f{ 0,650.f }}
+	  m_Pos				{Point2f{ 0,200.f }}
 	, m_IsCrouching		{false}
 	, m_Velocity		{0,0}
-	, m_JumpSpeed		{600.f}
+	, m_JumpSpeed		{800.f}
 	, m_RunSpeed		{400.f}
-	, m_Acceleration	{ 0, 0 }
+	, m_Acceleration	{ 0, 0}
 	, m_CurrentMovement	{movement::idle}
 	, m_IsShooting		{false}
 	, m_IsMirrored		{false}
@@ -41,46 +42,6 @@ void Avatar::Draw() const
 	glPushMatrix();
 	{
 		glTranslatef(m_Pos.x, m_Pos.y, 0);
-
-		/*switch (m_CurrentMovement)
-		{
-		case Avatar::movement::idle:
-			if (m_IsAiming)
-				m_pMainCharSprites[5]->DrawSprite(m_IsMirrored);
-			else if (m_IsShooting)
-				m_pMainCharSprites[10]->DrawSprite(m_IsMirrored);
-			else
-					m_pMainCharSprites[0]->DrawSprite(m_IsMirrored);
-			break;
-		case Avatar::movement::left:
-			if (m_IsAiming)
-				m_pMainCharSprites[5]->DrawSprite(m_IsMirrored);
-			else if (m_IsShooting)
-					m_pMainCharSprites[2]->DrawSprite(m_IsMirrored);
-				else
-					m_pMainCharSprites[1]->DrawSprite(m_IsMirrored);
-			break;
-		case Avatar::movement::right:
-			if (m_IsAiming)
-				m_pMainCharSprites[5]->DrawSprite(m_IsMirrored);
-			else if (m_IsShooting)
-					m_pMainCharSprites[2]->DrawSprite(m_IsMirrored);
-			else
-					m_pMainCharSprites[1]->DrawSprite(m_IsMirrored);
-			
-			break;
-		case Avatar::movement::down:
-			if (m_IsAiming)
-				m_pMainCharSprites[6]->DrawSprite(m_IsMirrored);
-			else
-					m_pMainCharSprites[3]->DrawSprite(m_IsMirrored);
-			break;
-		case Avatar::movement::jump:
-					m_pMainCharSprites[4]->DrawSprite(m_IsMirrored);
-			break;
-		default:
-			break;
-		}*/
 		m_pMainCharSprites[m_SpriteIdx]->DrawSprite(m_IsMirrored);
 	}
 	glPopMatrix();
@@ -91,7 +52,7 @@ void Avatar::Draw() const
 
 void Avatar::Update(float elapsedSec, const Level& level)
 {
-	//bool onGround{ level.IsOnGround(GetShape())};
+	bool onGround{ level.IsOnGround(GetShape())};
 
 	m_CurrentMovement = movement::idle;
 
@@ -101,10 +62,10 @@ void Avatar::Update(float elapsedSec, const Level& level)
 
 		
 	}
-	else
+	else*/
 	{
 		m_Velocity += m_Acceleration * elapsedSec;
-	}*/
+	}
 	KeyboardFunctionality(elapsedSec);
 	UpdateMovement(elapsedSec);
 	
@@ -115,11 +76,15 @@ void Avatar::Update(float elapsedSec, const Level& level)
 		m_Pos.y += m_Velocity.y * elapsedSec;
 		m_Pos.x += m_Velocity.x;
 	}
-	level.HandleCollision(m_Pos, m_Shape, m_Velocity);
+	//level.HandleCollision(m_Pos, m_Shape, m_Velocity);
 
 
 	//SPRITE	ANIMATION
 	m_pMainCharSprites[m_SpriteIdx]->UpdateSprite(elapsedSec);
+
+
+
+	std::cout << "(" << m_Pos.x << ", " << m_Pos.y << ")" << std::endl;
 
 }
 
@@ -165,7 +130,13 @@ void Avatar::KeyboardFunctionality(float elapsedSec)
 		m_IsCrouching = true;
 		m_CurrentMovement = movement::down;
 	}
+	if (pStates[SDL_SCANCODE_SPACE])
+	{
+		m_TimesJumped++;
+		m_CurrentMovement = movement::jump;
+		m_SpriteIdx = 4;
 
+	}
 	
 
 	if (!m_IsCrouching)
@@ -222,9 +193,9 @@ void Avatar::KeyboardFunctionality(float elapsedSec)
 					m_SpriteIdx = 0;
 			}			
 		}
+		
 
-
-		else if (pStates[SDL_SCANCODE_RIGHT])
+		if (pStates[SDL_SCANCODE_RIGHT])
 		{
 
 			if (m_IsAiming)
@@ -238,7 +209,7 @@ void Avatar::KeyboardFunctionality(float elapsedSec)
 
 
 		}
-		else if (pStates[SDL_SCANCODE_LEFT])
+		if (pStates[SDL_SCANCODE_LEFT])
 		{
 			
 		
@@ -252,12 +223,6 @@ void Avatar::KeyboardFunctionality(float elapsedSec)
 			m_CurrentMovement = movement::left;
 		}
 
-		else if (pStates[SDL_SCANCODE_SPACE])
-		{
-			m_CurrentMovement = movement::jump;
-			m_SpriteIdx = 4;
-
-		}
 	}
 		
 
@@ -309,6 +274,7 @@ void Avatar::UpdateMovement(float elapsedSec)
 			m_IsCrouching = false;
 			m_IsShooting = false;
 			m_IsAiming = false;
+			m_TimesJumped = 0;
 			break;
 
 		case Avatar::movement::left:
@@ -322,12 +288,13 @@ void Avatar::UpdateMovement(float elapsedSec)
 			break;
 
 		case Avatar::movement::jump:
+			if(m_TimesJumped == 1)
 			m_Velocity.y = m_JumpSpeed;
 			break;
 		default:
 			break;
 		}
-		m_Velocity += m_Acceleration * elapsedSec;
+		
 		
 		//std::cout << "(" << m_Shape.left << ", " << m_Shape.bottom << ")" << std::endl;
 		
